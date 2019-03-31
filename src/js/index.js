@@ -1,3 +1,4 @@
+import '../styles/index.css';
 import ForceGraph3D from '3d-force-graph';
 import dataset from '../datasets/sample_pcap.json';
 
@@ -30,6 +31,8 @@ const graphNodes = craftNodeJson(dataset);
 
 const Graph = ForceGraph3D()(document.getElementById('3d-graph'))
 	.graphData(graphNodes)
+	.width('100%')
+	.height('100%')
 	.nodeLabel('id')
 	.nodeAutoColorBy('group')
 	.linkLabel(d => d.protocol)
@@ -37,4 +40,17 @@ const Graph = ForceGraph3D()(document.getElementById('3d-graph'))
 	.linkDirectionalArrowLength(3.5)
 	.linkDirectionalArrowRelPos(1)
 	.linkDirectionalParticles(d => d.value / 10)
-	.linkDirectionalParticleSpeed(d => d.time * 0.001);
+	.linkDirectionalParticleSpeed(d => d.time * 0.001).onNodeClick(node => {
+		// Aim at node from outside it
+		const distance = 40;
+		const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
+
+		Graph.cameraPosition({
+				x: node.x * distRatio,
+				y: node.y * distRatio,
+				z: node.z * distRatio
+			}, // new position
+			node, // lookAt ({ x, y, z })
+			3000 // ms transition duration
+		);
+	});
